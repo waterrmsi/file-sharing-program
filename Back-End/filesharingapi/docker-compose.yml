@@ -6,7 +6,7 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_DB: postgres
+      KC_DB: FileSharingSystemDataBase
       KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/FileSharingSystemDataBase
       KC_DB_USERNAME: keyloack
       KC_DB_PASSWORD: keyloack
