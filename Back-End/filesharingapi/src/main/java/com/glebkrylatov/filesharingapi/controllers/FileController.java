@@ -50,6 +50,6 @@ public class FileController  {
     public ResponseEntity<DeleteFileResponse> deleteFile(@RequestBody DeleteFileRequest request, Authentication authentication) {
         String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
 
-        return fileService.deleteFile(request, userId);
+        return ResponseEntity.ok(fileService.deleteFile(request, userId));
     }
 }
