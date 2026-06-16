@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface FileRepository extends JpaRepository<File, UUID> {
-    public Optional<File> getFileByFileId(String fileId);
+    public Optional<File> getFileById(String fileId);
     public List<File> getFilesByOwnerId(String ownerId);
 }

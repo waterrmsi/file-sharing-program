@@ -16,7 +16,7 @@ public class File {
     @Id
     @Column(name = "file_id")
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID uuid;
+    private UUID id;
 
     @Column(name = "owner_user_id")
     private String ownerId;

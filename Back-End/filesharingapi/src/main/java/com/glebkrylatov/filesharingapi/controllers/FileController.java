@@ -1,6 +1,7 @@
 package com.glebkrylatov.filesharingapi.controllers;
 
 import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadRequest;
+import com.glebkrylatov.filesharingapi.dtos.responses.FileUploadConfirmResponse;
 import com.glebkrylatov.filesharingapi.dtos.responses.PresignedUrlResponse;
 import com.glebkrylatov.filesharingapi.servicies.FileService;
 import com.glebkrylatov.filesharingapi.servicies.UserService;
@@ -24,4 +25,10 @@ public class FileController  {
         String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
         return ResponseEntity.ok(fileService.generatePresignedUrl(request, userId));
     }
+
+    /*@PostMapping("/confirm-upload-file")
+    public ResponseEntity<FileUploadConfirmResponse> confirmUploadFile (@RequestBody FileUploadRequest request,
+                                                                        Authentication authentication) {
+        return ResponseEntity.ok(new FileUploadConfirmResponse());
+    }*/
 }

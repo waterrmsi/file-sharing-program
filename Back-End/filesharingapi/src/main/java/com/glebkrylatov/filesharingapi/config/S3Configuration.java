@@ -11,6 +11,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -31,6 +32,20 @@ public class S3Configuration {
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of("us-east-1"))
                 .forcePathStyle(true)
+                .build();
+    }
+
+    @Bean
+    public S3Presigner s3Presigner() {
+        AwsBasicCredentials credentials = AwsBasicCredentials.create(
+                minioProperties.getAccessKey(),
+                minioProperties.getSecretKey()
+        );
+
+        return S3Presigner.builder()
+                .endpointOverride(URI.create(minioProperties.getEndpoint()))
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .region(Region.of("us-east-1"))
                 .build();
     }
 }
