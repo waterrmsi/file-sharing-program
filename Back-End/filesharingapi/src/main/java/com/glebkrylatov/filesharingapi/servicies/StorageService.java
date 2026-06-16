@@ -4,9 +4,7 @@ import com.glebkrylatov.filesharingapi.properties.MinioProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -50,9 +48,35 @@ public class StorageService {
                 .toString();
     }
 
-    //удаляет файл из minio по ключу
+    //Удаляет файл из minio по ключу
     public boolean deleteFileFromStorage(String key) {
-        s3Client.deleteObject(DeleteObjectRequest.builder().key(key).build());
-        return true;
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(minioProperties.getBucket())
+                    .key(key)
+                    .build());
+
+            return true;
+        } catch (NoSuchKeyException e) {
+            return false;
+        }
+    }
+
+    //Проверяет существование файла по ключу
+    public boolean existFileByKey(String key) {
+        try {
+            s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(minioProperties.getBucket())
+                    .key(key)
+                    .build());
+
+            return true;
+        } catch (NoSuchKeyException e) {
+            return false;
+        }
+    }
+
+    public String getBucketName() {
+        return minioProperties.getBucket();
     }
 }

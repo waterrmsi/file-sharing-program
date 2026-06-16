@@ -1,7 +1,7 @@
 package com.glebkrylatov.filesharingapi.dtos.responses;
 
+import java.util.UUID;
+
 public record FileUploadConfirmResponse(
-    String key,
-    String fileName,
-    long size
+    UUID id
 ) { }
