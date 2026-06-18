@@ -5,6 +5,7 @@ import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadConfirmRequest;
 import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadRequest;
 import com.glebkrylatov.filesharingapi.dtos.responses.DeleteFileResponse;
 import com.glebkrylatov.filesharingapi.dtos.responses.PresignedUrlResponse;
+import com.glebkrylatov.filesharingapi.dtos.responses.UserFileResponse;
 import com.glebkrylatov.filesharingapi.models.File;
 import com.glebkrylatov.filesharingapi.repositories.FileRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,7 +24,7 @@ public class FileService {
     private final FileRepository fileRepository;
     private final StorageService storageService;
 
-    public PresignedUrlResponse generatePresignedUrl(FileUploadRequest fileUploadRequest, String userId) {
+    public PresignedUrlResponse generateUploadPresignedUrl(FileUploadRequest fileUploadRequest, String userId) {
         String key = userId + "/" + UUID.randomUUID().toString();
         String uploadUrl = storageService.generateUploadUrl(key, fileUploadRequest.contentType());
 
@@ -67,5 +70,46 @@ public class FileService {
         fileRepository.delete(file);
 
         return new DeleteFileResponse(true, "Файл успешно удален");
+    }
+
+    public List<UserFileResponse> getUserFiles(String userId) {
+        List<File> files = fileRepository.getFilesByOwnerId(userId);
+        List<UserFileResponse> result = new ArrayList<>();
+
+        for(File file : files) {
+            result.add(new UserFileResponse(
+                    file.getId(),
+                    file.getFileName(),
+                    file.getContentType(),
+                    file.getSize(),
+                    file.isPublic(),
+                    file.getCreatedAt().toString())
+            );
+        }
+
+        return result;
+    }
+
+    public UserFileResponse getFileById(UUID Id, String userId) {
+        Optional<File> optional = fileRepository.getFileById(Id);
+
+        if(optional.isEmpty()) {
+            return null;
+        }
+
+        File file = optional.get();
+
+        //Если файл не публичный и его запрашивает другой пользователь, то not found
+        if(!file.getOwnerId().equals(userId) && !file.isPublic()) {
+            return null;
+        }
+
+        return new UserFileResponse(
+                file.getId(),
+                file.getFileName(),
+                file.getContentType(),
+                file.getSize(),
+                file.isPublic(),
+                file.getCreatedAt().toString());
     }
 }

@@ -40,5 +40,5 @@ public class File {
     Timestamp createdAt;
 
     @Column(name = "is_public")
-    public boolean isPublic;
+    private boolean isPublic;
 }
