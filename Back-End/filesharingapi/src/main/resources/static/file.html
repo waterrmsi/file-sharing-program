@@ -3,9 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>File sharing project</title>
-    <link rel="stylesheet" href="css/file.css">
+    <link rel="stylesheet" href="/css/file.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css">
 </head>
 <body>
-    <h1>FILE.HTML</h1>
+    <div class="header-container">
+        <header class="header">
+            <div class="logo-container">
+                <img src="/logo.png" alt="" class="logo" id="logo">
+            </div>
+            <div class="user-info"></div>
+        </header>
+    </div>
+
+    <div class="file-page-wrapper">
+        <div class="file-page-card">
+            <div class="file-page-icon" id="fileIcon">
+                <i class="ti ti-file"></i>
+            </div>
+            <div class="file-page-info">
+                <p class="file-page-name" id="fileName">—</p>
+                <p class="file-page-meta" id="fileMeta">—</p>
+                <p class="file-page-date" id="fileDate">—</p>
+            </div>
+            <button class="file-page-download-btn" id="downloadBtn">
+                <i class="ti ti-download"></i> Скачать
+            </button>
+        </div>
+    </div>
+
+    <script src="/js/file.js"></script>
 </body>
 </html>

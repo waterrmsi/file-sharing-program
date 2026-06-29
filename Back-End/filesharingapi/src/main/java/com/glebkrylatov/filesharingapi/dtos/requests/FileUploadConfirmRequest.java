@@ -5,6 +5,5 @@ public record FileUploadConfirmRequest (
         String objectKey,
         String contentType,
         long size,
-        boolean isPublic,
-        String key
+        boolean isPublic
 ) { }

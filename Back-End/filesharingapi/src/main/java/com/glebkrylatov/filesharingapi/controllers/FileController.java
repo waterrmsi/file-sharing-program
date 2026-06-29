@@ -1,12 +1,7 @@
 package com.glebkrylatov.filesharingapi.controllers;
 
-import com.glebkrylatov.filesharingapi.dtos.requests.DeleteFileRequest;
-import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadConfirmRequest;
-import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadRequest;
-import com.glebkrylatov.filesharingapi.dtos.responses.DeleteFileResponse;
-import com.glebkrylatov.filesharingapi.dtos.responses.FileUploadConfirmResponse;
-import com.glebkrylatov.filesharingapi.dtos.responses.PresignedUrlResponse;
-import com.glebkrylatov.filesharingapi.dtos.responses.UserFileResponse;
+import com.glebkrylatov.filesharingapi.dtos.requests.*;
+import com.glebkrylatov.filesharingapi.dtos.responses.*;
 import com.glebkrylatov.filesharingapi.servicies.FileService;
 import com.glebkrylatov.filesharingapi.servicies.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.annotation.Documented;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +19,7 @@ import java.util.UUID;
 @RequestMapping("/files")
 @RequiredArgsConstructor
 @Tag(name = "Файлы", description = "Контроллер для работы с файлами.")
+@CrossOrigin(origins = "http://127.0.0.1:5500") //web-server
 public class FileController  {
     private final FileService fileService;
     private final UserService userService;
@@ -40,16 +35,29 @@ public class FileController  {
         return ResponseEntity.ok(fileService.generateUploadPresignedUrl(request, userId));
     }
 
+    @PostMapping("generate-download-url")
+    public ResponseEntity<GenerateDownloadUrlResponse> generateDownloadUrl(@RequestBody GenerateDownloadUrlRequest request, Authentication authentication) {
+        String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
+
+        GenerateDownloadUrlResponse result = fileService.generateDownloadUrlResponse(request, userId);
+
+        if(result.url().isEmpty()) {
+            return ResponseEntity.notFound().build();
+        };
+
+        return ResponseEntity.ok(result);
+    }
+
     @Operation(summary = "Подтверждение загрузки файла в Minio хранилища",
             description = "Добавляет данные о файле в БД")
     @PostMapping("/confirm-upload-file")
-    public ResponseEntity<FileUploadConfirmResponse> confirmUploadFile (@RequestBody FileUploadConfirmRequest request, Authentication authentication) {
+    public ResponseEntity<UserFileResponse> confirmUploadFile (@RequestBody FileUploadConfirmRequest request, Authentication authentication) {
         String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
 
-        if(fileService.existFileByKey(request.key())) {
-            UUID fileId = fileService.createFileData(request, userId);
+        if(fileService.existFileByKey(request.objectKey())) {
+            UserFileResponse result = fileService.createFileData(request, userId);
 
-            return ResponseEntity.ok(new FileUploadConfirmResponse(fileId));
+            return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -61,7 +69,7 @@ public class FileController  {
     public ResponseEntity<DeleteFileResponse> deleteFile(@RequestBody DeleteFileRequest request, Authentication authentication) {
         String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
 
-        DeleteFileResponse response = fileService.deleteFile(request, userId);
+        DeleteFileResponse response = fileService.deleteFile(request.fileId(), userId);
 
         if(!response.isDeleted()) {
             return ResponseEntity.notFound().build();
@@ -71,22 +79,18 @@ public class FileController  {
     }
 
     @Operation(summary = "Получение данных о файлах пользователя",
-            description = "Получение данных о файлах пользователя с бд, для отображение на фронте")
+            description = "Получение данных о файлах пользователя с бд")
     @GetMapping("user-files")
     public ResponseEntity<List<UserFileResponse>> getUserFiles(Authentication authentication) {
         String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
 
         List<UserFileResponse> result = fileService.getUserFiles(userId);
 
-        if(result.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Получение данных о файле по его ID",
-            description = "Получение данных о файле с бд, для отображение на фронте")
+            description = "Получение данных о файле с бд")
     @GetMapping("file-by-id")
     public ResponseEntity<UserFileResponse> getFileById(@RequestParam UUID fileId,
                                                         Authentication authentication) {
@@ -99,5 +103,31 @@ public class FileController  {
         }
 
         return ResponseEntity.ok(file);
+    }
+
+    @Operation(summary = "Удаление списка файлов по их ID",
+            description = "Удаляет список файлов из бд и S3 хранилища")
+    @DeleteMapping("delete-files")
+    public ResponseEntity<List<DeleteFilesResponse>> deleteFile(@RequestBody DeleteFilesRequest request, Authentication authentication) {
+        String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
+        List<DeleteFilesResponse> result = fileService.deleteFiles(request, userId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Установка состояния публичности файла",
+            description = "Устанавливает isPublic по fileId")
+    @PostMapping("switch-file-state")
+    public ResponseEntity<SwitchIsPublicStateFileResponse> switchIsPublicStateOnFile(@RequestBody SwitchIsPublicStateFileRequest request,
+                                                      Authentication authentication) {
+        String userId = userService.getUserFromToken((JwtAuthenticationToken) authentication).getId();
+
+        SwitchIsPublicStateFileResponse result = fileService.switchIsPublicStateOnFile(request,  userId);
+
+        if(result.isSwitched()) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.badRequest().body(result);
+        }
     }
 }

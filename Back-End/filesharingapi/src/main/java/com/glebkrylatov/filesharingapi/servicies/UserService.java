@@ -7,6 +7,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
+    /**
+     * Преобразует jwt-token в объект класса User
+     * @param token jwt-token авторизации
+     * @return Модель данных пользователя
+     */
     public User getUserFromToken(JwtAuthenticationToken token) {
         User user = new User();
         user.setId(token.getToken().getSubject());

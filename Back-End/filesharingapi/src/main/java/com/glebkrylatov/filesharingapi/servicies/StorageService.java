@@ -19,7 +19,12 @@ public class StorageService {
     private final S3Client s3Client;
     private final MinioProperties minioProperties;
 
-    //Возвращает ссылку для загрузки файла напрямую в Minio хранилище. Время жизни ссылки 5 минут
+    /**
+     * Генерирует presigned-url для загрузки файла в s3 хранилище
+     * @param key Ключ файла в s3
+     * @param contentType MIME-тип файла
+     * @return presigned-url
+     */
     public String generateUploadUrl(String key, String contentType) {
         return s3Presigner.presignPutObject(
                 PutObjectPresignRequest.builder()
@@ -34,7 +39,11 @@ public class StorageService {
                 .toString();
     }
 
-    //Возвращает ссылку для загрузки файла напрямую в Minio хранилище. Время жизни 5 минут
+    /**
+     * Генерирует presigned-url для загрузки файла в s3 хранилище
+     * @param key Ключ файла в s3 хранилище
+     * @return presigned-url
+     */
     public String generateDownloadUrl(String key) {
         return s3Presigner.presignGetObject(
                 GetObjectPresignRequest.builder()
@@ -48,7 +57,11 @@ public class StorageService {
                 .toString();
     }
 
-    //Удаляет файл из minio по ключу
+    /**
+     * Удаляет файл из s3 хранилища по его ключу
+     * @param key Ключ файла в s3 хранилище
+     * @return true если файл существует по ключу в s3 хранилище и он был удален, false если файла по полученному ключу не существует.
+     */
     public boolean deleteFileFromStorage(String key) {
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
@@ -62,7 +75,11 @@ public class StorageService {
         }
     }
 
-    //Проверяет существование файла по ключу
+    /**
+     * Проверяет существование файла в s3 хранилище
+     * @param key Ключ файла в s3 хранилище
+     * @return true если файл существует по полученному ключу в s3 хранилище, false если по полученному ключу его не существует
+     */
     public boolean existFileByKey(String key) {
         try {
             s3Client.headObject(HeadObjectRequest.builder()
@@ -76,6 +93,9 @@ public class StorageService {
         }
     }
 
+    /**
+     * @return Название бакета
+     */
     public String getBucketName() {
         return minioProperties.getBucket();
     }

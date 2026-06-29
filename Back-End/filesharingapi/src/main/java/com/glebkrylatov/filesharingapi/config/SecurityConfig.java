@@ -18,6 +18,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
@@ -26,10 +27,14 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/",
+                                "/index.html",
+                                "/error",
+                                "/images/**",
                                 "/file/**",
                                 "/favicon.ico",
                                 "/css/**",
-                                "/js/**"
+                                "/js/**",
+                                "/logo.png"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

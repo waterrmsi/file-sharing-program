@@ -32,7 +32,7 @@ public class WebController {
         return ResponseEntity.ok(new ClassPathResource("imgs/favicon.png"));
     }
 
-    @GetMapping("/logo")
+    @GetMapping("/logo.png")
     public ResponseEntity<Resource> getLogo() {
         return ResponseEntity.ok(new ClassPathResource("imgs/logo.png"));
     }

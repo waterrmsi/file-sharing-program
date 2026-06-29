@@ -4,19 +4,67 @@
     <meta charset="UTF-8">
     <title>File sharing project</title>
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.1.0/tabler-icons.min.css">
 </head>
 <body>
     <div class="header-container">
         <header class="header" class="header-container">
             <div class="logo-container">
-                <img src="temp/logo.png" alt="" class="logo">
+                <img src="/logo.png" alt="" class="logo">
             </div>
                 
             <div class="user-info">
-                <p>Войти</p>
-                <p>Инф</p>
+                
             </div>
         </header>
     </div>
+
+    <div class="main-activity-wrapper">
+        <div class="main-activity">
+            <div class="option-panel">
+                <input type="file" id="fileInput" hidden>
+                <button class="opt-btn" id="upload-btn">
+                    Загрузить файл
+                </button>
+
+                <button class="opt-btn" id="delete-btn">
+                    Удалить выбранные файлы
+                </button>
+            </div>
+
+            <div class="file-panel">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="modal-close" id="closeAuthModal">✕</button>
+
+            <!-- Вход -->
+            <div class="modal-tab" id="loginTab">
+                <h2 class="modal-title">Вход</h2>
+                <input class="modal-input" type="text" placeholder="Логин" id="loginInputAutorization">
+                <input class="modal-input" type="password" placeholder="Пароль" id="passwordInputAutorization">
+                <button class="modal-btn" id="authButton">Войти</button>
+                <p class="modal-switch">Нет аккаунта? <span id="toRegister">Зарегистрируйтесь</span></p>
+            </div>
+
+            <!-- Регистрация -->
+            <div class="modal-tab" id="registerTab" style="display: none;">
+                <h2 class="modal-title">Регистрация</h2>
+                <input class="modal-input" type="text" placeholder="Логин" id="loginInputRegistation">
+                <input class="modal-input" type="text" placeholder="Имя" id="nameInputRegistation">
+                <input class="modal-input" type="text" placeholder="Фамилия" id="surnameInputRegistation">
+                <input class="modal-input" type="email" placeholder="Email" id="emailInputRegistation">
+                <input class="modal-input" type="password" placeholder="Пароль" id="passwordInputRegistation">
+                <button class="modal-btn" id="regButton">Зарегистрироваться</button>
+                <p class="modal-switch">Уже есть аккаунт? <span id="toLogin">Войти</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/index.js"></script>
 </body>
 </html>

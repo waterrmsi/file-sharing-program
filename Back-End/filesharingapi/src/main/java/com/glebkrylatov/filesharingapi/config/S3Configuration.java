@@ -43,9 +43,14 @@ public class S3Configuration {
         );
 
         return S3Presigner.builder()
-                .endpointOverride(URI.create(minioProperties.getEndpoint()))
+                .endpointOverride(URI.create(minioProperties.getPublicEndpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of("us-east-1"))
+                .serviceConfiguration(
+                        software.amazon.awssdk.services.s3.S3Configuration.builder()
+                                .pathStyleAccessEnabled(true)
+                                .build()
+                )
                 .build();
     }
 }

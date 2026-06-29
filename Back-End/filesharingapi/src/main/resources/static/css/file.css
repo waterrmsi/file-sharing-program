@@ -1,0 +1,125 @@
+:root {
+    --bg-primary: #e8e0d5;
+    --bg-panel: #f5f0e8;
+    --text-primary: #2a1f14;
+    --text-secondary: #6b5744;
+    --shadow: rgba(0,0,0,0.08);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    background-color: var(--bg-primary);
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 99vw;
+    height: 75px;
+    background-color: var(--bg-panel);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.logo-container {
+    margin-left: 20px;
+}
+
+.logo {
+    height: 75px;
+    display: block;
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    width: 100vw;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.file-page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.file-page-card {
+    background-color: var(--bg-panel);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 400px;
+}
+
+.file-page-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background-color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--text-secondary);
+}
+
+.file-page-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+.file-page-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    word-break: break-all;
+}
+
+.file-page-meta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.file-page-date {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.file-page-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow);
+    transition: filter 0.2s;
+    width: 100%;
+    justify-content: center;
+}
+
+.file-page-download-btn:hover {
+    filter: brightness(0.95);
+}

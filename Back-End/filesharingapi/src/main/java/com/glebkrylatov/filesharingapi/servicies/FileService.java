@@ -1,11 +1,7 @@
 package com.glebkrylatov.filesharingapi.servicies;
 
-import com.glebkrylatov.filesharingapi.dtos.requests.DeleteFileRequest;
-import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadConfirmRequest;
-import com.glebkrylatov.filesharingapi.dtos.requests.FileUploadRequest;
-import com.glebkrylatov.filesharingapi.dtos.responses.DeleteFileResponse;
-import com.glebkrylatov.filesharingapi.dtos.responses.PresignedUrlResponse;
-import com.glebkrylatov.filesharingapi.dtos.responses.UserFileResponse;
+import com.glebkrylatov.filesharingapi.dtos.requests.*;
+import com.glebkrylatov.filesharingapi.dtos.responses.*;
 import com.glebkrylatov.filesharingapi.models.File;
 import com.glebkrylatov.filesharingapi.repositories.FileRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +20,12 @@ public class FileService {
     private final FileRepository fileRepository;
     private final StorageService storageService;
 
+    /**
+    * Генерирует key файла, передаёт его в storage service для генерации presigned-url
+    * @param fileUploadRequest dto
+    * @param userId - id пользователя
+    * @return presigned-url, key файла
+    */
     public PresignedUrlResponse generateUploadPresignedUrl(FileUploadRequest fileUploadRequest, String userId) {
         String key = userId + "/" + UUID.randomUUID().toString();
         String uploadUrl = storageService.generateUploadUrl(key, fileUploadRequest.contentType());
@@ -31,7 +33,30 @@ public class FileService {
         return new PresignedUrlResponse(uploadUrl, key);
     }
 
-    public UUID createFileData(FileUploadConfirmRequest request, String userId) {
+    public GenerateDownloadUrlResponse generateDownloadUrlResponse(GenerateDownloadUrlRequest request,
+            String userId) {
+        Optional<File> optional = fileRepository.getFileById(request.fileId());
+
+        if(optional.isEmpty()) {
+            return new GenerateDownloadUrlResponse(null);
+        }
+
+        File file = optional.get();
+
+        if(!file.getOwnerId().equals(userId) && !file.isPublic()) {
+            return new GenerateDownloadUrlResponse(null);
+        }
+
+        return new GenerateDownloadUrlResponse(storageService.generateDownloadUrl(file.getObjectKey()));
+    }
+
+    /**
+     *
+     * @param request dto
+     * @param userId id пользователя
+     * @return
+     */
+    public UserFileResponse createFileData(FileUploadConfirmRequest request, String userId) {
         File file = new File();
         file.setFileName(request.fileName());
         file.setContentType(request.contentType());
@@ -40,16 +65,28 @@ public class FileService {
         file.setPublic(request.isPublic());
         file.setSize(request.size());
         file.setOwnerId(userId);
+        file.setObjectKey(request.objectKey());
 
-        return fileRepository.save(file).getId();
+        return this.convertFileToDto(fileRepository.save(file));
     }
 
+    /**
+     * Возвращает информацию о существовании файла в s3 хранилище
+     * @param key ключ файла в s3
+     * @return true если файл существует в s3, false если не существует
+     */
     public boolean existFileByKey(String key) {
         return storageService.existFileByKey(key);
     }
 
-    public DeleteFileResponse deleteFile(DeleteFileRequest request, String userId) {
-        Optional<File> optional = fileRepository.getFileById(request.fileId());
+    /**
+     * Удаляет файл из бд и s3 хранилища по его id
+     * @param id id файла
+     * @param userId id пользователя
+     * @return dto объект с информацией об удалении файла
+     */
+    public DeleteFileResponse deleteFile(UUID id, String userId) {
+        Optional<File> optional = fileRepository.getFileById(id);
         if(optional.isEmpty()) {
             return new DeleteFileResponse(false, "Файл не найден");
         }
@@ -57,7 +94,7 @@ public class FileService {
         File file = optional.get();
 
         if(!file.getOwnerId().equals(userId)) {
-            return new DeleteFileResponse(false, "Вы не можете удалить свой файл");
+            return new DeleteFileResponse(false, "Вы не можете удалить чужой файл");
         }
 
         //Если существует запись в бд, но файл в S3 не найден, то удаляем запись в бд.
@@ -72,6 +109,11 @@ public class FileService {
         return new DeleteFileResponse(true, "Файл успешно удален");
     }
 
+    /**
+     * Получает данные файлов с бд
+     * @param userId id пользователя
+     * @return dto объект - список данных файлов
+     */
     public List<UserFileResponse> getUserFiles(String userId) {
         List<File> files = fileRepository.getFilesByOwnerId(userId);
         List<UserFileResponse> result = new ArrayList<>();
@@ -90,6 +132,12 @@ public class FileService {
         return result;
     }
 
+    /**
+     * Получает файл по id
+     * @param Id id файла
+     * @param userId id пользователя
+     * @return dto объект с данными файла
+     */
     public UserFileResponse getFileById(UUID Id, String userId) {
         Optional<File> optional = fileRepository.getFileById(Id);
 
@@ -104,12 +152,69 @@ public class FileService {
             return null;
         }
 
-        return new UserFileResponse(
+        return this.convertFileToDto(file);
+    }
+
+    /**
+     * Преобразует Entity файла в dto
+     * @param file Entity файла
+     * @return dto
+     */
+    private UserFileResponse convertFileToDto(File file) {
+        UserFileResponse result = new UserFileResponse(
                 file.getId(),
                 file.getFileName(),
                 file.getContentType(),
                 file.getSize(),
                 file.isPublic(),
-                file.getCreatedAt().toString());
+                file.getCreatedAt().toString()
+        );
+
+        return result;
+    }
+
+    /**
+     * Удаляет один или несколько файлов из БД и s3 хранилища по их id
+     * @param request dto
+     * @param userId id пользователя
+     * @return dto с информацией об удалении файлов
+     */
+    public List<DeleteFilesResponse> deleteFiles(DeleteFilesRequest request, String userId) {
+        List<DeleteFilesResponse> result = new ArrayList<>();
+
+        for(UUID id : request.fileIds()) {
+            DeleteFileResponse response = this.deleteFile(id, userId);
+            result.add(new DeleteFilesResponse(id, response.isDeleted(), response.operationMessage()));
+        }
+
+        return result;
+    }
+
+    /**
+     * Устанавливает состояние публичности файла
+     * @param request dto
+     * @param userId id пользователя
+     * @return dto с информацией об изменении состояния публичности файла
+     */
+    public SwitchIsPublicStateFileResponse switchIsPublicStateOnFile(SwitchIsPublicStateFileRequest request, String userId) {
+        Optional<File> optional = fileRepository.getFileById(request.id());
+
+        if(optional.isEmpty()) {
+            return new SwitchIsPublicStateFileResponse(request.id(), false, "Файл не найден");
+        }
+
+        File file = optional.get();
+
+        if(!file.getOwnerId().equals(userId)) {
+            return new SwitchIsPublicStateFileResponse(request.id(),
+                    false,
+                    "Вы не можете изменить публичность чужого файла");
+        }
+
+        file.setPublic(request.isPublic());
+
+        fileRepository.save(file);
+
+        return new SwitchIsPublicStateFileResponse(request.id(), true, "Успешно");
     }
 }
