@@ -19,6 +19,11 @@ public class AuthController {
 
     private final KeycloakRegistrationService keycloakRegistrationService;
 
+    /**
+     * Эндпоинт регистрации пользователей в системе
+     * @param request объект с регистрационными данными пользователя
+     * @return ResponseEntity.ok - при регистрации, HttpStatus.CONFLICT при ошибке регистрации
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {

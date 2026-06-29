@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Контроллер для передачи данных на front-end (html, css, js или же изображений)
+ */
 @Controller
 @RequestMapping("/")
 public class WebController {

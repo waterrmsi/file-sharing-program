@@ -16,13 +16,37 @@ import org.springframework.http.HttpHeaders;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Сервис для регистрации пользователей в Keycloak
+ * <p>
+ * Класс выполняет создание нового пользователя в указанном realm Keycloak
+ * через административный REST API. Для выполнения операции сервис сначала
+ * получает административный access token, после чего отправляет запрос
+ * на создание пользователя
+ */
 @Service
 @RequiredArgsConstructor
 public class KeycloakRegistrationService {
 
+    /**
+     * Данные подключения keycloak из application yaml
+     */
     private final KeycloakProperties keycloakProperties;
+
+    /**
+     * Клиент для выполнения http-запросов к Keycloak
+     */
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Регистрирует нового пользователя в Keycloak
+     * Метод получает административный токен, формирует JSON-объект пользователя
+     * и отправляет POST-запрос в административный API Keycloak.
+     * Пользователь создаётся активным, с подтверждённым email и постоянным паролем
+     * @param request объект с регистрационными данными пользователя
+     * @throws RuntimeException если пользователь с таким логином или email уже существует
+     * @throws RuntimeException если Keycloak вернул ошибку при создании пользователя
+     */
     public void registerUser(RegisterRequest request) {
         String adminToken = getAdminToken();
 
@@ -62,6 +86,14 @@ public class KeycloakRegistrationService {
         }
     }
 
+    /**
+     * Получает административный access token от Keycloak
+     * Метод отправляет запрос на token endpoint административного realm
+     * Для получения токена используется password grant с client id администратора,
+     * логином и паролем администратора, указанными в application.yaml
+     * @return строковое значение access token администратора
+     * @throws RuntimeException если Keycloak не вернул access_token
+     */
     private String getAdminToken() {
         String tokenUrl = keycloakProperties.getServerUrl()
                 + "/realms/"

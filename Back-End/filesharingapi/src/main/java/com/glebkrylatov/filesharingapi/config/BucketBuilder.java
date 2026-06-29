@@ -8,12 +8,18 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 
+/**
+ * Класс для построения схемы S3 хранилища
+ */
 @Component
 @RequiredArgsConstructor
 public class BucketBuilder {
     private final MinioProperties minioProperties;
     private final S3Client s3Client;
 
+    /**
+     * Метод инициализации бакета в minio, в случае если он не создан
+     */
     @PostConstruct
     public void initBucket() {
         String bucket = minioProperties.getBucket();
