@@ -15,11 +15,21 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
+/**
+ * Класс для инициализации объектов S3 хранилища
+ */
 @Configuration
 @RequiredArgsConstructor
 public class S3Configuration {
+    /**
+     * Данные подключения к Minio хранилищу из application.yaml
+     */
     private final MinioProperties minioProperties;
 
+    /**
+     * Инициализирует клиент для работы с Minio
+     * @return объект класса - S3Client
+     */
     @Bean
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(
@@ -35,6 +45,10 @@ public class S3Configuration {
                 .build();
     }
 
+    /**
+     * Метод инициализирующий объект для генерации временных ссылок на загрузку или скачивания файлов с S3 хранилища
+     * @return объект класса - S3Presigner
+     */
     @Bean
     public S3Presigner s3Presigner() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(

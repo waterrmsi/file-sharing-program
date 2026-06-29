@@ -2,6 +2,7 @@ package com.glebkrylatov.filesharingapi.controllers;
 
 import com.glebkrylatov.filesharingapi.dtos.requests.RegisterRequest;
 import com.glebkrylatov.filesharingapi.servicies.KeycloakRegistrationService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ public class AuthController {
      * @param request объект с регистрационными данными пользователя
      * @return ResponseEntity.ok - при регистрации, HttpStatus.CONFLICT при ошибке регистрации
      */
+    @Operation(summary = "Эндпоинт регистрации пользователей в системе",
+            description = "Регистрирует пользователя в keycloak")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
